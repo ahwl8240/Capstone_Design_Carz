@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
-
+import os
+import cv2
 #UI파일 연결
 #단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
 form_class = uic.loadUiType("test.ui")[0]
@@ -23,9 +24,25 @@ class WindowClass(QMainWindow, form_class) :
 
     def loadImageFromFile(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(self,'Open File')
-        self.qPixmapVar.load(filename[0])
-        self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
-        self.imageview.setPixmap(self.qPixmapVar)
+        fn,fe=os.path.splitext(filename[0])
+        if fe[1:4] == 'png' or fe[1:4] == 'jpg':
+            self.qPixmapVar.load(filename[0])
+            self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+            self.imageview.setPixmap(self.qPixmapVar)
+        elif fe[1:4] == 'mp4' or fe[1:4] == 'avi':
+            vidcap = cv2.VideoCapture(filename[0])
+            success,cutimage = vidcap.read()
+            cnt = 1
+            success=True
+            while success:
+                success,cutimage = vidcap.read()
+                if(int(vidcap.get(1))%20==0):
+                    cv2.imwrite("D:\cuted_image\%d.jpg" % cnt,cutimage)
+                    print("saved image %d.jpg" % cnt)
+                    cnt+=1
+                if cv2.waitKey(10) == 5:
+                    break
+                
         print(filename[0])
 
 if __name__ == "__main__" :
