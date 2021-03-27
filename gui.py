@@ -17,7 +17,7 @@ form_class = uic.loadUiType("test.ui")[0]
 #화면을 띄우는데 사용되는 Class 선언
 class WindowClass(QMainWindow, form_class) :
     app = QApplication(sys.argv)
-    app.addLibraryPath(r"C:\\Users\\박수오\\AppData\\Local\\Programs\\Python\\Python38\\Lib\\site-packages\\PyQt5\\Qt\\plugins")
+    app.addLibraryPath("./plugins")
     
     def __init__(self) :
         
