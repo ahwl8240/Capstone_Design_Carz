@@ -46,6 +46,7 @@ class WindowClass(QMainWindow, form_class) :
             self.qPixmapVar.load(filename[0])
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
+            self.ch=1
         elif fe[1:4] == 'mp4' or fe[1:4] == 'avi':
             self.progressBar.setVisible(True)
             vidcap = cv2.VideoCapture(filename[0])
@@ -75,7 +76,7 @@ class WindowClass(QMainWindow, form_class) :
                     self.imageview.setPixmap(self.qPixmapVar)"""
                 if cv2.waitKey(10) == 27:
                     break
-        self.ch=1
+            self.ch=1
         print(filename[0])
         
     def doOperation(self):
