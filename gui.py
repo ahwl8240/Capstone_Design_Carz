@@ -6,6 +6,8 @@ from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 import math
+import winsound as sd
+import numpy as np
 
 import os
 import cv2
@@ -53,14 +55,17 @@ class WindowClass(QMainWindow, form_class) :
             success,cutimage = vidcap.read()
             cnt = 1
             success=True
-            """self.qPixmapVar.load("wait0.png")
+            self.qPixmapVar.load("wait0.png")
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
-            self.imageview.setPixmap(self.qPixmapVar)"""
-
-            self.loding_img=QMovie('loding.gif',QByteArray(),self)
+            self.imageview.setPixmap(self.qPixmapVar)
+            save_path="d:\cuted_img"
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
+        
+            """self.loding_img=QMovie('loding.gif',QByteArray(),self)
             self.loding_img.setCacheMode(QMovie.CacheAll)
             self.imageview.setMovie(self.loding_img)
-            self.loding_img.start()
+            self.loding_img.start()"""
 
 
             vidcount = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))//20
@@ -68,12 +73,13 @@ class WindowClass(QMainWindow, form_class) :
                 success,cutimage = vidcap.read()
                 if(int(vidcap.get(1))%20==0):
                     self.progressBar.setValue((cnt/vidcount)*100)
-                    cv2.imwrite("cuted_img\%d.jpg" % cnt,cutimage)
+                    
+                    cv2.imwrite(save_path+"\%d.jpg" % cnt,cutimage)
                     print("saved image %d.jpg" % cnt)
                     cnt+=1
-                    """self.qPixmapVar.load("wait"+str(cnt%3)+".png")
+                    self.qPixmapVar.load("wait"+str(cnt%3)+".png")
                     self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
-                    self.imageview.setPixmap(self.qPixmapVar)"""
+                    self.imageview.setPixmap(self.qPixmapVar)
                 if cv2.waitKey(10) == 27:
                     break
             self.ch=1
@@ -82,7 +88,10 @@ class WindowClass(QMainWindow, form_class) :
     def doOperation(self):
         if self.ch == 0:
             print("choose file")
+            sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
             buttonReply = QMessageBox.question(self, '경고!', "이미지가 선택되지 않았습니다!", QMessageBox.Yes)
+            
+
         
 
 
