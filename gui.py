@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 import math
 import winsound as sd
-import numpy as np
+import fsrcnn
 
 import os
 import cv2
@@ -48,6 +48,7 @@ class WindowClass(QMainWindow, form_class) :
             self.qPixmapVar.load(filename[0])
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
+            self.file_path = filename[0]
             self.ch=1
         elif fe[1:4] == 'mp4' or fe[1:4] == 'avi':
             self.progressBar.setVisible(True)
@@ -90,6 +91,9 @@ class WindowClass(QMainWindow, form_class) :
             print("choose file")
             sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
             buttonReply = QMessageBox.question(self, '경고!', "이미지가 선택되지 않았습니다!", QMessageBox.Yes)
+        else:
+            operated = fsrcnn.sr_operate(self.file_path)
+            print(operated)
             
 
         
