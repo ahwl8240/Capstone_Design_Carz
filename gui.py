@@ -39,7 +39,7 @@ class WindowClass(QMainWindow, form_class) :
         self.progressBar.hide()
 
         self.scrollArea.hide()
-
+        
         self.btn_upload.clicked.connect(self.loadImageFromFile)
         self.btn_ok.clicked.connect(self.doOperation)
 
@@ -118,7 +118,16 @@ class WindowClass(QMainWindow, form_class) :
         self.progressBar.hide()
         self.progressBar.setValue(0)
         
-        #self.scrollArea.setWidgetResizable(True)
+        
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.gridLayout = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.layout.addWidget(self.scrollArea)
+
+
+
 
         for i in range(self.img_list_cnt):
             for j in range(2):
@@ -126,15 +135,10 @@ class WindowClass(QMainWindow, form_class) :
 
                 listpixmap = QPixmap()
                 listpixmap.load(PNG_LIST[i])
-                listpixmap=listpixmap.scaledToWidth(400)
+                listpixmap=listpixmap.scaled(350,250)
                 img_label.setPixmap(listpixmap)
                 self.gridLayout.addWidget(img_label,i//2,j)
-                
-                
-                #self.qPixmapVar = QPixmap()
-                #self.qPixmapVar.load("carz.png")
-                #self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
-                #self.imageview.setPixmap(self.qPixmapVar)
+        
         self.scrollArea.setVisible(True)
         
         

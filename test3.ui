@@ -62,6 +62,22 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="text">
+     <string>MM:SS</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>440</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>원하는 이미지가 없다면 분:초 로 입력해 주세요!</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

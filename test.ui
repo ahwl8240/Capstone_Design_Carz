@@ -66,34 +66,28 @@
      <number>24</number>
     </property>
    </widget>
-   <widget class="QWidget" name="gridLayoutWidget">
+   <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>781</width>
-      <height>491</height>
+      <width>779</width>
+      <height>489</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>777</width>
-          <height>487</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
-     </item>
-    </layout>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>777</width>
+       <height>487</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
