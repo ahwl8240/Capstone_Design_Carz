@@ -3,10 +3,12 @@ from cv2 import dnn_superres
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-# Create an SR object
-sr = dnn_superres.DnnSuperResImpl_create()
+
 
 def sr_operate(img_path):
+    # Create an SR object
+    sr = dnn_superres.DnnSuperResImpl_create()
+
     # Read image
     img_array = np.fromfile(img_path,np.uint8)
 

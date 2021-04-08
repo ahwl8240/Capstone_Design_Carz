@@ -6,6 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 
+import shutil
 import winsound as sd
 import fsrcnn
 
@@ -19,7 +20,7 @@ form_class = uic.loadUiType("test.ui")[0]
 #화면을 띄우는데 사용되는 Class 선언
 class WindowClass(QMainWindow, form_class) :
     app = QApplication(sys.argv)
-    app.addLibraryPath("./plugins")
+    app.addLibraryPath(".\plugins")
     clicked = pyqtSignal()
 
     def __init__(self) :
@@ -29,69 +30,137 @@ class WindowClass(QMainWindow, form_class) :
         
         self.ch = 0
 
+        #타이틀
         self.setWindowTitle("알려줘! 카즈")
+
+        #메인 이미지 설정
         self.qPixmapVar = QPixmap()
         self.qPixmapVar.load("carz.png")
         self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
 
+        #메인 이미지 불러와서 적용
         self.imageview.setPixmap(self.qPixmapVar)
 
+        #초기 진행바 숨김
         self.progressBar.setValue(0)
         self.progressBar.hide()
 
+        #스크롤 화면 숨김
         self.scrollArea.hide()
         
+        #버튼 클릭 이벤트
         self.btn_upload.clicked.connect(self.loadImageFromFile)
         self.btn_ok.clicked.connect(self.doOperation)
 
+    #업로드 버튼 클릭 시
     def loadImageFromFile(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(self,'Open File','','Image File(*.jpg *png);; Video File(*.avi *mp4)')
+
+        #파일탐색기 제목, 선택 확장자 명, 확장자
+        filename = QtWidgets.QFileDialog.getOpenFileName(self,'영상 선택','','Image File(*.jpg *png);; Video File(*.avi *mp4)')
+
+        #파일 이름, 확장자 분리
         fn,fe=os.path.splitext(filename[0])
+
+        #이미지 인 경우
         if fe[1:4] == 'png' or fe[1:4] == 'jpg':
+
+            #해당 이미지를 메인화면으로 변경
             self.qPixmapVar.load(filename[0])
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
+
+            #해당 파일명 저장
             self.file_path = filename[0]
+
+            #확인 버튼 처리용
             self.ch=1
+
+        #영상의 경우
         elif fe[1:4] == 'mp4' or fe[1:4] == 'avi':
+
+            #진행바 보이게 함
             self.progressBar.setVisible(True)
+
+            #비디오 캡쳐
             vidcap = cv2.VideoCapture(filename[0])
             success,cutimage = vidcap.read()
             cnt = 1
             success=True
+
+            #최초 로딩 이미지 설정
             self.qPixmapVar.load("wait0.png")
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
-            save_path="d:\cuted_img"
+
+            #분할이미지 저장경로 지정
+            save_path="d:\\cuted_img"
+
+            #경로 없는 경우 생성
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
+            
+            #있는 경우 폴더 삭제 후 재생성(파일 꼬임 등을 방지하기 위해)
+            else:
+                shutil.rmtree(r"d:\\cuted_img")
+                os.mkdir(save_path)
 
+            #20프레임 단위로 자름
             vidcount = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))//20
+
+            #처리 중 업로드 방지를 위해 버튼 숨김
             self.btn_upload.hide()
+
+            #끝날때 까지 반복
             while success:
+
+                #이미지 캡쳐
                 success,cutimage = vidcap.read()
+
+                #캡쳐된 프레임이 20 단위인 경우
                 if(int(vidcap.get(1))%20==0):
+
+                    #진행바 표시변경
                     self.progressBar.setValue((cnt/vidcount)*100)
                     
+                    #로딩 이미지 변경
                     cv2.imwrite(save_path+"\%d.jpg" % cnt,cutimage)
+
+                    #콘솔표시
                     print("saved image %d.jpg" % cnt)
+
+                    #이미지 수 카운트
                     self.img_list_cnt = cnt
                     cnt+=1
+
+                    #이미지 불러오기
                     self.qPixmapVar.load("wait"+str(cnt%3)+".png")
                     self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
                     self.imageview.setPixmap(self.qPixmapVar)
+
+                #종료조건 키입력
                 if cv2.waitKey(10) == 27:
                     break
+            
+            #이미지 선택으로 넘어간다.
             self.img_list_select()
+
+        #콘솔창에 선택된 이미지나 동영상의 이름 출력
         print(filename[0])
-        
+    
+    #확인버튼 동작
     def doOperation(self):
         
+        #아무 영상도 선택되지 않았을 경우 경고 메세지 출력
         if self.ch == 0:
             print("choose file")
             sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
             buttonReply = QMessageBox.question(self, '경고!', "이미지가 선택되지 않았습니다!", QMessageBox.Yes)
+
+        #ch==1일때 즉, 동영상에서 혹은 이미지 한장을 선택한경우
         else:
+            
+            #동영상의 경우 이미지 선택할 때 스크롤화면만 보이게 하기위해 숨겨둠
+            #다시 활성화
             self.imageview.setVisible(True)
             """
             self.loding_img=QMovie('loding.gif',QByteArray(),self)
@@ -100,44 +169,66 @@ class WindowClass(QMainWindow, form_class) :
             self.loding_img.start()
             """
 
+            #다시 확인버튼시 오류방지, 다시누르면 경고창뜨게함
             self.ch=0
-            self.scrollArea.hide()
-            
-            
 
+            #스크롤화면을 가리기위함
+            self.scrollArea.hide()
+
+            
+            #SR모델 적용한 이미지 경로 받아오기
             fsrcnn_img = fsrcnn.sr_operate(self.file_path)
+
+            #콘솔에 경로 출력
             print(fsrcnn_img)
 
+            #처리된 이미지를 메인화면으로 띄워줌
             self.qPixmapVar.load(fsrcnn_img)
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
+
+            #동영상처리 중 오류방지를 위해 숨겨둔 버튼 다시 활성화
             self.btn_upload.setVisible(True)
 
+            #SR처리가 완료됨을 알림
             sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
             buttonReply = QMessageBox.question(self, '안내', "Up Scaling 완료", QMessageBox.Yes)
 
-    
+    #동영상에서 이미지 선택화면
     def img_list_select(self):
+
+        #잘린 이미지들을 불러옴
         self.img_list = os.listdir("d:\cuted_img")
+
+        #여기부터는 불필요한 작업일 수 있음
         self.FILE_LIST=[]
         png_list =[]
         self.PNG_LIST=[]
+
+        #이미지들이 존재한다면 png_list에 파일명들을 저장
         if len(self.img_list) > 0:
             for file_name in self.img_list:
                 if (file_name.find('.png') == len(file_name)-4) or (file_name.find('.jpg') == len(file_name)-4):
                     png_list.append(file_name)
-            
+        
+        #저장된 파일명들이 존재하는 경우
         if len(png_list) > 0 :
+
+            #각각의 이미지 경로로부터 이미지 오브젝트 생성
             for png_file in png_list:
                 pixmap = QPixmap("d:\cuted_img"+'\\'+png_file)
 
+                #해당 이미지 경로 저장
                 png_path = "d:\cuted_img"+'\\'+png_file
                 self.PNG_LIST.append(png_path)
         
+        #해당 과정 중 불필요한 오브젝트들을 숨긴다
         self.imageview.hide()
         self.progressBar.hide()
         self.progressBar.setValue(0)
         
+        #레이아웃생성, 스크롤 영역 설정, 스크롤영역에 추가될 오브젝트 생성,
+        #생성된 오브젝트에 그리드 레이아웃 적용, 스크롤 영역에 오브젝트 추가, 최종 레이아웃에 스크롤영역 추가
         self.layout = QtWidgets.QHBoxLayout(self)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
@@ -146,28 +237,44 @@ class WindowClass(QMainWindow, form_class) :
         self.layout.addWidget(self.scrollArea)
 
 
-
+        #이미지 카운트용 변수
         index = 0
-        
+
+        #각 이미지 라벨 저장용 리스트
         self.label_list = []
+
+        #한줄에 2개씩 배치하기 위한 반복문
         for i in range((self.img_list_cnt+1)//2):
             for j in range(2):
                 
+                #각각의 라벨 생성
                 img_label = QLabel(self)
+
+                #클릭 가능하게 하기 위한 함수
                 self.clickable(img_label).connect(self.pictureListClicked)
                 
+                #라벨에 들어갈 이미지 오브젝트
                 listpixmap = QPixmap()
                 listpixmap.load(self.PNG_LIST[index])
                 listpixmap=listpixmap.scaled(350,250)
                 img_label.setPixmap(listpixmap)
+
+                #그리드 레이아웃 해당 위치에 저장
                 self.gridLayout.addWidget(img_label,i,j)
+
+                #추후 접근을 위한 리스트에 저장
                 self.label_list.append(img_label)
                 
                 index+=1
+
+                #홀수일 때 out of range 방지를 위함
+                if index == self.img_list_cnt:
+                    break
         
+        #설정된 스크롤 영역을 보이게 함
         self.scrollArea.setVisible(True)
     
-
+    #이미지 클릭 가능하게 하는 함수
     def clickable(self,widget):
         class Filter(QObject):
             clicked = pyqtSignal()
@@ -185,7 +292,7 @@ class WindowClass(QMainWindow, form_class) :
         self.FILE_LIST.append(filter)
         return filter.clicked
             
-    
+    #이미지를 각각 클릭 가능하게 하는 함수
     def pictureListClicked(self):
         png_path = ''
         for i, object_name in enumerate(self.FILE_LIST):
