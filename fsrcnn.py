@@ -18,8 +18,8 @@ def sr_operate(img_path):
     sr.readModel(path)
 
     # Set CUDA backend and target to enable GPU inference
-    sr.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-    sr.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+    #sr.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+    #sr.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
     # Set the desired model and scale to get correct pre- and post-processing
     sr.setModel("fsrcnn", 4)

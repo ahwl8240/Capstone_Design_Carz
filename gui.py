@@ -5,7 +5,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
-import math
+
 import winsound as sd
 import fsrcnn
 
@@ -20,7 +20,8 @@ form_class = uic.loadUiType("test.ui")[0]
 class WindowClass(QMainWindow, form_class) :
     app = QApplication(sys.argv)
     app.addLibraryPath("./plugins")
-    
+    clicked = pyqtSignal()
+
     def __init__(self) :
         
         super().__init__()
@@ -64,14 +65,9 @@ class WindowClass(QMainWindow, form_class) :
             save_path="d:\cuted_img"
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
-        
-            """self.loding_img=QMovie('loding.gif',QByteArray(),self)
-            self.loding_img.setCacheMode(QMovie.CacheAll)
-            self.imageview.setMovie(self.loding_img)
-            self.loding_img.start()"""
-
 
             vidcount = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))//20
+            self.btn_upload.hide()
             while success:
                 success,cutimage = vidcap.read()
                 if(int(vidcap.get(1))%20==0):
@@ -86,24 +82,48 @@ class WindowClass(QMainWindow, form_class) :
                     self.imageview.setPixmap(self.qPixmapVar)
                 if cv2.waitKey(10) == 27:
                     break
-            self.ch=1
             self.img_list_select()
         print(filename[0])
         
     def doOperation(self):
+        
         if self.ch == 0:
             print("choose file")
             sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
             buttonReply = QMessageBox.question(self, '경고!', "이미지가 선택되지 않았습니다!", QMessageBox.Yes)
         else:
-            operated = fsrcnn.sr_operate(self.file_path)
-            print(operated)
+            self.imageview.setVisible(True)
+            """
+            self.loding_img=QMovie('loding.gif',QByteArray(),self)
+            self.loding_img.setCacheMode(QMovie.CacheAll)
+            self.imageview.setMovie(self.loding_img)
+            self.loding_img.start()
+            """
+
+            self.ch=0
+            self.scrollArea.hide()
+            
+            
+
+            fsrcnn_img = fsrcnn.sr_operate(self.file_path)
+            print(fsrcnn_img)
+
+            self.qPixmapVar.load(fsrcnn_img)
+            self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+            self.imageview.setPixmap(self.qPixmapVar)
+            self.btn_upload.setVisible(True)
+
+            sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
+            buttonReply = QMessageBox.question(self, '안내', "Up Scaling 완료", QMessageBox.Yes)
+
+    
     def img_list_select(self):
-        img_list = os.listdir("d:\cuted_img")
+        self.img_list = os.listdir("d:\cuted_img")
+        self.FILE_LIST=[]
         png_list =[]
-        PNG_LIST=[]
-        if len(img_list) > 0:
-            for file_name in img_list:
+        self.PNG_LIST=[]
+        if len(self.img_list) > 0:
+            for file_name in self.img_list:
                 if (file_name.find('.png') == len(file_name)-4) or (file_name.find('.jpg') == len(file_name)-4):
                     png_list.append(file_name)
             
@@ -112,12 +132,11 @@ class WindowClass(QMainWindow, form_class) :
                 pixmap = QPixmap("d:\cuted_img"+'\\'+png_file)
 
                 png_path = "d:\cuted_img"+'\\'+png_file
-                PNG_LIST.append(png_path)
+                self.PNG_LIST.append(png_path)
         
         self.imageview.hide()
         self.progressBar.hide()
         self.progressBar.setValue(0)
-        
         
         self.layout = QtWidgets.QHBoxLayout(self)
         self.scrollArea.setWidgetResizable(True)
@@ -128,22 +147,62 @@ class WindowClass(QMainWindow, form_class) :
 
 
 
-
-        for i in range(self.img_list_cnt):
+        index = 0
+        
+        self.label_list = []
+        for i in range((self.img_list_cnt+1)//2):
             for j in range(2):
-                img_label = QLabel('imglabel'+str(i+1),self)
-
+                
+                img_label = QLabel(self)
+                self.clickable(img_label).connect(self.pictureListClicked)
+                
                 listpixmap = QPixmap()
-                listpixmap.load(PNG_LIST[i])
+                listpixmap.load(self.PNG_LIST[index])
                 listpixmap=listpixmap.scaled(350,250)
                 img_label.setPixmap(listpixmap)
-                self.gridLayout.addWidget(img_label,i//2,j)
+                self.gridLayout.addWidget(img_label,i,j)
+                self.label_list.append(img_label)
+                
+                index+=1
         
         self.scrollArea.setVisible(True)
-        
-        
-            
+    
 
+    def clickable(self,widget):
+        class Filter(QObject):
+            clicked = pyqtSignal()
+
+            def eventFilter(self, obj, event):
+                if obj == widget:
+                    if event.type() == QEvent.MouseButtonRelease:
+                        if obj.rect().contains(event.pos()):
+                            self.clicked.emit()
+                            return True
+
+                return False
+        filter = Filter(widget)
+        widget.installEventFilter(filter)
+        self.FILE_LIST.append(filter)
+        return filter.clicked
+            
+    
+    def pictureListClicked(self):
+        png_path = ''
+        for i, object_name in enumerate(self.FILE_LIST):
+            if object_name == self.sender():
+                index = i
+                selected_img = object_name
+                png_path = self.PNG_LIST[i]
+                break;
+
+        if png_path != '':
+            print(png_path)
+            for i in range(len(self.label_list)):
+                self.label_list[i].setStyleSheet("")
+            self.label_list[index].setStyleSheet("color: red;" "border-style: solid;" "border-width: 2px;""border-color: #FA8072;" "border-radius: 3px")
+            self.update()
+            self.ch=1
+            self.file_path=png_path
         
 
 
