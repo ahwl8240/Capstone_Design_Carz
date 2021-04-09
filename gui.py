@@ -41,16 +41,18 @@ class WindowClass(QMainWindow, form_class) :
         #메인 이미지 불러와서 적용
         self.imageview.setPixmap(self.qPixmapVar)
 
-        #초기 진행바 숨김
+        #불필요한 내용 숨김
         self.progressBar.setValue(0)
         self.progressBar.hide()
-
-        #스크롤 화면 숨김
-        self.scrollArea.hide()
+        #self.scrollArea.hide()
+        self.time_edit.hide()
+        self.btn_edit.hide()
+        self.label_anounce.hide()
         
         #버튼 클릭 이벤트
         self.btn_upload.clicked.connect(self.loadImageFromFile)
         self.btn_ok.clicked.connect(self.doOperation)
+        self.btn_edit.clicked.connect(self.video_time_edit)
 
     #업로드 버튼 클릭 시
     def loadImageFromFile(self):
@@ -61,6 +63,9 @@ class WindowClass(QMainWindow, form_class) :
         #파일 이름, 확장자 분리
         fn,fe=os.path.splitext(filename[0])
 
+        #해당 파일명 저장
+        self.file_path = filename[0]
+
         #이미지 인 경우
         if fe[1:4] == 'png' or fe[1:4] == 'jpg':
 
@@ -68,9 +73,6 @@ class WindowClass(QMainWindow, form_class) :
             self.qPixmapVar.load(filename[0])
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
-
-            #해당 파일명 저장
-            self.file_path = filename[0]
 
             #확인 버튼 처리용
             self.ch=1
@@ -149,6 +151,9 @@ class WindowClass(QMainWindow, form_class) :
     
     #확인버튼 동작
     def doOperation(self):
+        self.btn_edit.hide()
+        self.time_edit.hide()
+        self.label_anounce.hide()
         
         #아무 영상도 선택되지 않았을 경우 경고 메세지 출력
         if self.ch == 0:
@@ -229,12 +234,16 @@ class WindowClass(QMainWindow, form_class) :
         
         #레이아웃생성, 스크롤 영역 설정, 스크롤영역에 추가될 오브젝트 생성,
         #생성된 오브젝트에 그리드 레이아웃 적용, 스크롤 영역에 오브젝트 추가, 최종 레이아웃에 스크롤영역 추가
+        
+        
         self.layout = QtWidgets.QHBoxLayout(self)
+        self.scrollArea = QtWidgets.QScrollArea(self)
+        self.scrollArea.resize(780,490)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.gridLayout = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.layout.addWidget(self.scrollArea)
+        #self.layout.addWidget(self.scrollArea)
 
 
         #이미지 카운트용 변수
@@ -273,6 +282,15 @@ class WindowClass(QMainWindow, form_class) :
         
         #설정된 스크롤 영역을 보이게 함
         self.scrollArea.setVisible(True)
+
+        #동영상 부분 입력 활성화
+        self.btn_edit.setVisible(True)
+        self.time_edit.setVisible(True)
+        self.time_edit.setPlaceholderText("MM:SS")
+        self.label_anounce.setVisible(True)
+
+        
+        
     
     #이미지 클릭 가능하게 하는 함수
     def clickable(self,widget):
@@ -306,11 +324,43 @@ class WindowClass(QMainWindow, form_class) :
             print(png_path)
             for i in range(len(self.label_list)):
                 self.label_list[i].setStyleSheet("")
-            self.label_list[index].setStyleSheet("color: red;" "border-style: solid;" "border-width: 2px;""border-color: #FA8072;" "border-radius: 3px")
+            self.label_list[index].setStyleSheet("border-style: solid;" "border-width: 3px;""border-color: green")
             self.update()
             self.ch=1
             self.file_path=png_path
         
+    def video_time_edit(self):
+        time_str = self.time_edit.text()
+
+        start_time_ms = int(time_str[:2])*60+int(time_str[3:])-500
+        stop_time_ms = start_time_ms+1000
+        vidcap = cv2.VideoCapture(self.file_path)
+
+
+        count = 0
+        success = True
+        #분할이미지 저장경로 지정
+        save_path="d:\\cuted_img"
+
+        #경로 없는 경우 생성
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+            
+        #있는 경우 폴더 삭제 후 재생성(파일 꼬임 등을 방지하기 위해)
+        else:
+            shutil.rmtree(r"d:\\cuted_img")
+            os.mkdir(save_path)
+
+        while success and vidcap.get(cv2.CAP_PROP_POS_MSEC) < start_time_ms:
+            success, image = vidcap.read()
+
+        while success and vidcap.get(cv2.CAP_PROP_POS_MSEC) <= stop_time_ms:
+            success, image = vidcap.read()
+            print('Read a new frame: ', success)
+            #cv2.imwrite("/home/kapil/Documents/major/image/frame%d.jpg" % count, image)
+            cv2.imwrite(save_path+"\%d.jpg" % count,image)    
+            count += 1
+        self.img_list_select()
 
 
 

@@ -66,28 +66,41 @@
      <number>24</number>
     </property>
    </widget>
-   <widget class="QScrollArea" name="scrollArea">
+   <widget class="QPushButton" name="btn_edit">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>779</width>
-      <height>489</height>
+      <x>690</x>
+      <y>510</y>
+      <width>75</width>
+      <height>23</height>
      </rect>
     </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
+    <property name="text">
+     <string>입력</string>
     </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>777</width>
-       <height>487</height>
-      </rect>
-     </property>
-    </widget>
+   </widget>
+   <widget class="QLineEdit" name="time_edit">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>510</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_anounce">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>540</y>
+      <width>351</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>원하는 이미지가 없는 경우 캡쳐하고 싶은 시간을 입력해 주세요.</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
