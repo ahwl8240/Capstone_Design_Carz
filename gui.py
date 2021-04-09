@@ -44,7 +44,6 @@ class WindowClass(QMainWindow, form_class) :
         #불필요한 내용 숨김
         self.progressBar.setValue(0)
         self.progressBar.hide()
-        #self.scrollArea.hide()
         self.time_edit.hide()
         self.btn_edit.hide()
         self.label_anounce.hide()
@@ -124,7 +123,7 @@ class WindowClass(QMainWindow, form_class) :
                     #진행바 표시변경
                     self.progressBar.setValue((cnt/vidcount)*100)
                     
-                    #로딩 이미지 변경
+                    #분할 이미지 저장
                     cv2.imwrite(save_path+"\%d.jpg" % cnt,cutimage)
 
                     #콘솔표시
@@ -234,8 +233,6 @@ class WindowClass(QMainWindow, form_class) :
         
         #레이아웃생성, 스크롤 영역 설정, 스크롤영역에 추가될 오브젝트 생성,
         #생성된 오브젝트에 그리드 레이아웃 적용, 스크롤 영역에 오브젝트 추가, 최종 레이아웃에 스크롤영역 추가
-        
-        
         self.layout = QtWidgets.QHBoxLayout(self)
         self.scrollArea = QtWidgets.QScrollArea(self)
         self.scrollArea.resize(780,490)
@@ -328,8 +325,16 @@ class WindowClass(QMainWindow, form_class) :
             self.update()
             self.ch=1
             self.file_path=png_path
+
+            self.time_edit.hide()
+            self.btn_edit.hide()
+            self.label_anounce.hide()
+
         
     def video_time_edit(self):
+        self.scrollArea.hide()
+        self.imageview.setVisible(True)
+
         time_str = self.time_edit.text()
 
         start_time_ms = int(time_str[:2])*60+int(time_str[3:])-500
@@ -337,7 +342,7 @@ class WindowClass(QMainWindow, form_class) :
         vidcap = cv2.VideoCapture(self.file_path)
 
 
-        count = 0
+        count = 1
         success = True
         #분할이미지 저장경로 지정
         save_path="d:\\cuted_img"
@@ -351,15 +356,38 @@ class WindowClass(QMainWindow, form_class) :
             shutil.rmtree(r"d:\\cuted_img")
             os.mkdir(save_path)
 
+        """
+        #최초 로딩 이미지 설정
+        self.qPixmapVar.load("wait0.png")
+        self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+        self.imageview.setPixmap(self.qPixmapVar)
+        """
+        
         while success and vidcap.get(cv2.CAP_PROP_POS_MSEC) < start_time_ms:
             success, image = vidcap.read()
 
+        #vidcount = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+        
         while success and vidcap.get(cv2.CAP_PROP_POS_MSEC) <= stop_time_ms:
+            #진행바 표시변경
+            #self.progressBar.setValue((count/vidcount)*100)
+
             success, image = vidcap.read()
             print('Read a new frame: ', success)
-            #cv2.imwrite("/home/kapil/Documents/major/image/frame%d.jpg" % count, image)
-            cv2.imwrite(save_path+"\%d.jpg" % count,image)    
+            
+            cv2.imwrite(save_path+"\%d.jpg" % count,image)
+            self.img_list_cnt=count    
             count += 1
+
+            #이미지 불러오기
+            """print("wait"+str(count%3)+".png")
+            self.qPixmapVar.load("wait"+str(count%3)+".png")
+            self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+            self.imageview.setPixmap(self.qPixmapVar)"""
+
+        #처리가 완료됨을 알림
+        sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
+        buttonReply = QMessageBox.question(self, '안내', "지정 분할 완료", QMessageBox.Yes)
         self.img_list_select()
 
 
