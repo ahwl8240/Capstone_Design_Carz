@@ -177,7 +177,10 @@ class WindowClass(QMainWindow, form_class) :
             self.ch=0
 
             #스크롤화면을 가리기위함
-            self.scrollArea.hide()
+            try:
+                self.scrollArea.hide()
+            except AttributeError:
+                print("")
 
             
             #SR모델 적용한 이미지 경로 받아오기
