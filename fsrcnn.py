@@ -6,6 +6,7 @@ import numpy as np
 
 
 def sr_operate(img_path):
+    
     # Create an SR object
     sr = dnn_superres.DnnSuperResImpl_create()
 

@@ -9,6 +9,7 @@ from PyQt5.QtCore import *
 import shutil
 import winsound as sd
 import fsrcnn
+import carDetection
 
 import os
 import cv2
@@ -29,13 +30,15 @@ class WindowClass(QMainWindow, form_class) :
         self.setupUi(self)
         
         self.ch = 0
+        self.fsrcnn_img=""
+        self.croped_img_path=[]
 
         #타이틀
         self.setWindowTitle("알려줘! 카즈")
 
         #메인 이미지 설정
         self.qPixmapVar = QPixmap()
-        self.qPixmapVar.load("carz.png")
+        self.qPixmapVar.load("core_imgs\\carz.png")
         self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
 
         #메인 이미지 불러와서 적용
@@ -89,7 +92,7 @@ class WindowClass(QMainWindow, form_class) :
             success=True
 
             #최초 로딩 이미지 설정
-            self.qPixmapVar.load("wait0.png")
+            self.qPixmapVar.load("core_imgs\\wait0.png")
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
 
@@ -134,7 +137,7 @@ class WindowClass(QMainWindow, form_class) :
                     cnt+=1
 
                     #이미지 불러오기
-                    self.qPixmapVar.load("wait"+str(cnt%3)+".png")
+                    self.qPixmapVar.load("core_imgs\\wait"+str(cnt%3)+".png")
                     self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
                     self.imageview.setPixmap(self.qPixmapVar)
 
@@ -161,7 +164,7 @@ class WindowClass(QMainWindow, form_class) :
             buttonReply = QMessageBox.question(self, '경고!', "이미지가 선택되지 않았습니다!", QMessageBox.Yes)
 
         #ch==1일때 즉, 동영상에서 혹은 이미지 한장을 선택한경우
-        else:
+        elif self.ch==1:
             
             #동영상의 경우 이미지 선택할 때 스크롤화면만 보이게 하기위해 숨겨둠
             #다시 활성화
@@ -184,13 +187,14 @@ class WindowClass(QMainWindow, form_class) :
 
             
             #SR모델 적용한 이미지 경로 받아오기
-            fsrcnn_img = fsrcnn.sr_operate(self.file_path)
+            
+            self.fsrcnn_img = fsrcnn.sr_operate(self.file_path)
 
             #콘솔에 경로 출력
-            print(fsrcnn_img)
+            print(self.fsrcnn_img)
 
             #처리된 이미지를 메인화면으로 띄워줌
-            self.qPixmapVar.load(fsrcnn_img)
+            self.qPixmapVar.load(self.fsrcnn_img)
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
 
@@ -200,6 +204,12 @@ class WindowClass(QMainWindow, form_class) :
             #SR처리가 완료됨을 알림
             sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
             buttonReply = QMessageBox.question(self, '안내', "Up Scaling 완료", QMessageBox.Yes)
+            self.ch=2
+        #SR처리 완료시
+        elif self.ch==2:
+            self.croped_img_path=carDetection.plate_detect(self.fsrcnn_img)
+            print(self.croped_img_path)
+
 
     #동영상에서 이미지 선택화면
     def img_list_select(self):
@@ -383,8 +393,8 @@ class WindowClass(QMainWindow, form_class) :
             count += 1
 
             #이미지 불러오기
-            """print("wait"+str(count%3)+".png")
-            self.qPixmapVar.load("wait"+str(count%3)+".png")
+            """print("core_imgs\\wait"+str(count%3)+".png")
+            self.qPixmapVar.load("core_imgs\\wait"+str(count%3)+".png")
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)"""
 
