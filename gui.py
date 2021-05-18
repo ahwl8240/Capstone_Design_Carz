@@ -121,13 +121,14 @@ class WindowClass(QMainWindow, form_class) :
                 success,cutimage = vidcap.read()
 
                 #캡쳐된 프레임이 20 단위인 경우
-                if(int(vidcap.get(1))%20==0):
+                if(int(vidcap.get(1))%20==0 and cutimage is not None):
 
                     #진행바 표시변경
                     self.progressBar.setValue((cnt/vidcount)*100)
                     
+                    print(cnt,vidcap.get(1));
                     #분할 이미지 저장
-                    cv2.imwrite(save_path+"\%d.jpg" % cnt,cutimage)
+                    cv2.imwrite(save_path+"\\%d.jpg" % cnt,cutimage)
 
                     #콘솔표시
                     print("saved image %d.jpg" % cnt)
