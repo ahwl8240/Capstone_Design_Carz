@@ -348,13 +348,15 @@ class WindowClass(QMainWindow, form_class) :
     def video_time_edit(self):
         self.scrollArea.hide()
         self.imageview.setVisible(True)
+        self.btn_edit.hide()
+        self.time_edit.hide()
+        self.label_anounce.hide()
 
         time_str = self.time_edit.text()
 
         start_time_ms = int(time_str[:2])*60+int(time_str[3:])-500
         stop_time_ms = start_time_ms+1000
         vidcap = cv2.VideoCapture(self.file_path)
-
 
         count = 1
         success = True
