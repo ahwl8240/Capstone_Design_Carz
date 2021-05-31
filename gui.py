@@ -10,6 +10,8 @@ import shutil
 import winsound as sd
 import fsrcnn
 import carDetection
+import carDetection_video
+import Use_Classification
 
 import os
 import cv2
@@ -32,6 +34,8 @@ class WindowClass(QMainWindow, form_class) :
         self.ch = 0
         self.fsrcnn_img=""
         self.croped_img_path=[]
+        self.ocr_operated_text=""
+        self.car_information=[]
 
         #타이틀
         self.setWindowTitle("알려줘! 카즈")
@@ -55,6 +59,7 @@ class WindowClass(QMainWindow, form_class) :
         self.btn_upload.clicked.connect(self.loadImageFromFile)
         self.btn_ok.clicked.connect(self.doOperation)
         self.btn_edit.clicked.connect(self.video_time_edit)
+        self.btn_video_capture.clicked.connect(self.live_operation)
 
     #업로드 버튼 클릭 시
     def loadImageFromFile(self):
@@ -81,6 +86,9 @@ class WindowClass(QMainWindow, form_class) :
 
         #영상의 경우
         elif fe[1:4] == 'mp4' or fe[1:4] == 'avi':
+            #버튼 숨김
+            self.btn_ok.hide()
+            self.btn_video_capture.hide()
 
             #진행바 보이게 함
             self.progressBar.setVisible(True)
@@ -151,7 +159,10 @@ class WindowClass(QMainWindow, form_class) :
 
         #콘솔창에 선택된 이미지나 동영상의 이름 출력
         print(filename[0])
-    
+
+        #처리 후 버튼 텍스트 수정
+        self.btn_ok.setText("UpScaling")
+
     #확인버튼 동작
     def doOperation(self):
         self.btn_edit.hide()
@@ -166,7 +177,8 @@ class WindowClass(QMainWindow, form_class) :
 
         #ch==1일때 즉, 동영상에서 혹은 이미지 한장을 선택한경우
         elif self.ch==1:
-            
+            self.btn_video_capture.setVisible(True)
+            self.btn_ok.setText("Do LPD")
             #동영상의 경우 이미지 선택할 때 스크롤화면만 보이게 하기위해 숨겨둠
             #다시 활성화
             self.imageview.setVisible(True)
@@ -208,13 +220,49 @@ class WindowClass(QMainWindow, form_class) :
             self.ch=2
         #SR처리 완료시
         elif self.ch==2:
+            self.btn_ok.setText("Do OCR")
             self.croped_img_path=carDetection.plate_detect(self.fsrcnn_img)
+            #해당 이미지를 메인화면으로 변경
+            self.qPixmapVar.load(self.croped_img_path[0])
+            self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+            self.imageview.setPixmap(self.qPixmapVar)
+
             print(self.croped_img_path)
+            self.ch=3
+        #실시간 영상에서 자동차 번호판을 가져온 경우 DLP생략을 위해 별도 처리
+        elif self.ch==4:
+
+            self.btn_ok.setText("Do OCR")
+
+            #SR모델 적용한 이미지 경로 받아오기
+            
+            self.fsrcnn_img = fsrcnn.sr_operate(self.file_path)
+            #콘솔에 경로 출력
+            print(self.fsrcnn_img)
+            #처리된 이미지를 메인화면으로 띄워줌
+            self.qPixmapVar.load(self.fsrcnn_img)
+            self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+            self.imageview.setPixmap(self.qPixmapVar)
+
+            #SR처리가 완료됨을 알림
+            sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
+            buttonReply = QMessageBox.question(self, '안내', "Up Scaling 완료", QMessageBox.Yes)
+            self.ch=3
+        #sr이후 LPD까지 끝난 경우 OCR 처리
+        elif self.ch==3:
+            self.btn_ok.setText("용도분류")
+            print("OCR 들어갈 자리")
+            self.ocr_operated_text="998가4568"
+            print(self.ocr_operated_text)
+            self.ch=5
+        elif self.ch==5:
+            self.car_information.append(Use_Classification.use_classification(self.ocr_operated_text))
+            print(self.car_information)
 
 
     #동영상에서 이미지 선택화면
     def img_list_select(self):
-
+        self.btn_ok.setVisible(True)
         #잘린 이미지들을 불러옴
         self.img_list = os.listdir("d:\cuted_img")
 
@@ -406,6 +454,29 @@ class WindowClass(QMainWindow, form_class) :
         buttonReply = QMessageBox.question(self, '안내', "지정 분할 완료", QMessageBox.Yes)
         self.img_list_select()
 
+    def live_operation(self):
+        self.btn_upload.hide()
+        self.btn_ok.hide()
+        self.btn_video_capture.hide()
+        self.btn_ok.setText("UpScailing")
+        
+
+        self.file_path = carDetection_video.live_capture()
+        #해당 이미지를 메인화면으로 변경
+        self.qPixmapVar.load(self.file_path)
+        self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+        self.imageview.setPixmap(self.qPixmapVar)
+
+        #확인 버튼 처리용
+        self.ch=4
+
+        print("라이브 캡쳐"+self.file_path)
+
+        self.btn_upload.setVisible(True)
+        self.btn_ok.setVisible(True)
+        self.btn_video_capture.setVisible(True)
+
+        
 
 
 if __name__ == "__main__" :

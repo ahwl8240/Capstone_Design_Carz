@@ -102,6 +102,19 @@
      <string>원하는 이미지가 없는 경우 캡쳐하고 싶은 시간을 입력해 주세요.</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_video_capture">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>510</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>비디오캡쳐</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
