@@ -93,4 +93,5 @@ def use_classification(carplate):
     print("번호: "+car_code)
     print("특이사항: "+special_note)
 
-    return local,local_sub,result_car,result_purpose,car_code,special_note
+    result_list=[local,local_sub,result_car,result_purpose,car_code,special_note]
+    return result_list

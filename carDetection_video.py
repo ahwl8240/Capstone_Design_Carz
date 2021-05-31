@@ -49,21 +49,18 @@ def live_capture():
                     x,y,w,h = boxes[i]
                     crop_img.append(frame[y+1:y+h, x+1:x+w])
                     cv2.rectangle(frame, (x,y), (x+w, y+h), (0,0,255),1)  #번호판에 사각형 표시
-            cv2.imshow("detect", frame)                     #화면에 영상 계속 표사
+            #cv2.imshow("detect", frame)                     #화면에 영상 계속 표사
             if flag < 2 and len(boxes)>0:
                 for i in range(len(crop_img)):
                     croped_img_path="d:\\cuted_img\\" + "dpl" + ".jpg"
                     cv2.imwrite(croped_img_path, crop_img[i])#번호판 부분만 저장
-                    if cnt==0:
-                        time.sleep(3)
-                        print(str(cnt)+"번째 3초뒤 저장")
+                    time.sleep(3)
+                    print(str(cnt)+"번째 3초뒤 저장")
                     
                 flag += 1                                    #인식했다는 표시
-            if cv2.waitKey(100) == 27:                        #100초 동안 입력 없으면 종료, 이건 없애도 됨
-                break
-            if flag>=1:
+            if flag>=2:
                 cv2.destroyAllWindows()
                 break
-        if flag>=1:
+        if flag>=2:
             break
     return croped_img_path

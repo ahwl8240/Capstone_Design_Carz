@@ -54,6 +54,15 @@ class WindowClass(QMainWindow, form_class) :
         self.time_edit.hide()
         self.btn_edit.hide()
         self.label_anounce.hide()
+
+        self.imageview2.hide()
+        self.l1.hide()
+        self.l2.hide()
+        self.l3.hide()
+        self.l4.hide()
+        self.l5.hide()
+        self.l6.hide()
+        self.result_area.hide()
         
         #버튼 클릭 이벤트
         self.btn_upload.clicked.connect(self.loadImageFromFile)
@@ -239,6 +248,7 @@ class WindowClass(QMainWindow, form_class) :
             self.fsrcnn_img = fsrcnn.sr_operate(self.file_path)
             #콘솔에 경로 출력
             print(self.fsrcnn_img)
+            self.croped_img_path.append(self.fsrcnn_img)
             #처리된 이미지를 메인화면으로 띄워줌
             self.qPixmapVar.load(self.fsrcnn_img)
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
@@ -256,8 +266,9 @@ class WindowClass(QMainWindow, form_class) :
             print(self.ocr_operated_text)
             self.ch=5
         elif self.ch==5:
-            self.car_information.append(Use_Classification.use_classification(self.ocr_operated_text))
+            self.car_information=Use_Classification.use_classification(self.ocr_operated_text)
             print(self.car_information)
+            self.view_information()
 
 
     #동영상에서 이미지 선택화면
@@ -476,6 +487,34 @@ class WindowClass(QMainWindow, form_class) :
         self.btn_ok.setVisible(True)
         self.btn_video_capture.setVisible(True)
 
+    def view_information(self):
+        self.imageview2.setVisible(True)
+        self.l1.setVisible(True)
+        self.l2.setVisible(True)
+        self.l3.setVisible(True)
+        self.l4.setVisible(True)
+        self.l5.setVisible(True)
+        self.l6.setVisible(True)
+        self.result_area.setVisible(True)
+        self.result_area.setText(self.ocr_operated_text)
+
+        #해당 이미지를 메인화면으로 변경
+        self.qPixmapVar.load(self.croped_img_path[0])
+        self.qPixmapVar = self.qPixmapVar.scaledToWidth(230)
+        self.imageview2.setPixmap(self.qPixmapVar)
+
+        self.imageview.hide()
+        self.btn_ok.hide()
+        self.btn_upload.hide()
+        self.btn_video_capture.hide()
+        
+        
+        self.l6.setText("특이사항 : "+self.car_information.pop())
+        self.l5.setText("차량번호 : "+self.car_information.pop())
+        self.l4.setText("용도 : "+self.car_information.pop())
+        self.l3.setText("차종 : "+self.car_information.pop())
+        self.l2.setText("관할지 : "+self.car_information.pop())
+        self.l1.setText("지역 : "+self.car_information.pop())
         
 
 
