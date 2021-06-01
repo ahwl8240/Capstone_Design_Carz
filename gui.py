@@ -46,9 +46,14 @@ class WindowClass(QMainWindow, form_class) :
         
         self.ch = 0
         self.fsrcnn_img=""
-        self.croped_img_path=[]
+        self.croped_img_path=""
         self.ocr_operated_text=""
         self.car_information=[]
+        self.explain.setAlignment(Qt.AlignCenter)
+        self.imageview2.setAlignment(Qt.AlignCenter)
+        self.l6.setAlignment(Qt.AlignCenter)
+        self.explain.setText("이미지 선택 방식을 결정해주세요.")
+        self.btn_main.hide()
 
         #타이틀
         self.setWindowTitle("알려줘! 카즈")
@@ -82,9 +87,12 @@ class WindowClass(QMainWindow, form_class) :
         self.btn_ok.clicked.connect(self.doOperation)
         self.btn_edit.clicked.connect(self.video_time_edit)
         self.btn_video_capture.clicked.connect(self.live_operation)
+        self.btn_main.clicked.connect(self.return_main)
 
     #업로드 버튼 클릭 시
     def loadImageFromFile(self):
+
+        self.explain.setText("이미지를 다시 선택하거나, 해상도처리를 진행해주세요.")
 
         #파일탐색기 제목, 선택 확장자 명, 확장자
         filename = QtWidgets.QFileDialog.getOpenFileName(self,'영상 선택','','Image File(*.jpg *png);; Video File(*.avi *mp4)')
@@ -199,6 +207,7 @@ class WindowClass(QMainWindow, form_class) :
 
         #ch==1일때 즉, 동영상에서 혹은 이미지 한장을 선택한경우
         elif self.ch==1:
+            self.explain.setText("이미지를 다시 선택하거나, 번호판 인식을 진행해주세요.")
             self.btn_video_capture.setVisible(True)
             self.btn_ok.setText("Do LPD")
             #동영상의 경우 이미지 선택할 때 스크롤화면만 보이게 하기위해 숨겨둠
@@ -242,18 +251,22 @@ class WindowClass(QMainWindow, form_class) :
             self.ch=2
         #SR처리 완료시
         elif self.ch==2:
+            self.explain.setText("이미지를 다시 선택하거나, 번호인식처리를 진행해주세요.")
             self.btn_ok.setText("Do OCR")
             self.croped_img_path=carDetection.plate_detect(self.fsrcnn_img)
             #해당 이미지를 메인화면으로 변경
-            self.qPixmapVar.load(self.croped_img_path[0])
+            self.qPixmapVar.load(self.croped_img_path)
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
             self.imageview.setPixmap(self.qPixmapVar)
 
             print(self.croped_img_path)
+
+            
+
             self.ch=3
         #실시간 영상에서 자동차 번호판을 가져온 경우 DLP생략을 위해 별도 처리
         elif self.ch==4:
-
+            self.explain.setText("이미지를 다시 선택하거나, 번호인식처리를 진행해주세요.")
             self.btn_ok.setText("Do OCR")
 
             #SR모델 적용한 이미지 경로 받아오기
@@ -261,7 +274,7 @@ class WindowClass(QMainWindow, form_class) :
             self.fsrcnn_img = fsrcnn.sr_operate(self.file_path)
             #콘솔에 경로 출력
             print(self.fsrcnn_img)
-            self.croped_img_path.append(self.fsrcnn_img)
+            self.croped_img_path=self.fsrcnn_img
             #처리된 이미지를 메인화면으로 띄워줌
             self.qPixmapVar.load(self.fsrcnn_img)
             self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
@@ -273,9 +286,16 @@ class WindowClass(QMainWindow, form_class) :
             self.ch=3
         #sr이후 LPD까지 끝난 경우 OCR 처리
         elif self.ch==3:
+
+            self.explain.setText("이미지를 다시 선택하거나, 분류처리를 진행해주세요.")
             self.btn_ok.setText("용도분류")
-            self.ocr_operated_text=Recog_easyOCR.operate_OCR(self.croped_img_path[0])
+            self.ocr_operated_text=Recog_easyOCR.operate_OCR(self.croped_img_path)
             print(self.ocr_operated_text)
+
+            #SR처리가 완료됨을 알림
+            sd.PlaySound('SystemQuestion',sd.SND_ASYNC)
+            buttonReply = QMessageBox.question(self, '안내', "OCR 완료", QMessageBox.Yes)
+
             self.ch=5
         elif self.ch==5:
             self.car_information=Use_Classification.use_classification(self.ocr_operated_text)
@@ -285,6 +305,7 @@ class WindowClass(QMainWindow, form_class) :
 
     #동영상에서 이미지 선택화면
     def img_list_select(self):
+        self.explain.setText("이미지를 선택하거나, 영상의 범위를 정해주세요.")
         self.btn_ok.setVisible(True)
         #잘린 이미지들을 불러옴
         self.img_list = os.listdir("d:\\carz_operated\\cuted_img")
@@ -417,6 +438,7 @@ class WindowClass(QMainWindow, form_class) :
 
         
     def video_time_edit(self):
+        self.explain.setText("이미지를 다시 선택하거나, 해상도처리를 진행해주세요.")
         self.scrollArea.hide()
         self.imageview.setVisible(True)
         self.btn_edit.hide()
@@ -478,6 +500,7 @@ class WindowClass(QMainWindow, form_class) :
         self.img_list_select()
 
     def live_operation(self):
+        self.explain.setText("이미지를 다시 선택하거나, 해상도처리를 진행해주세요.")
         self.btn_upload.hide()
         self.btn_ok.hide()
         self.btn_video_capture.hide()
@@ -500,6 +523,7 @@ class WindowClass(QMainWindow, form_class) :
         self.btn_video_capture.setVisible(True)
 
     def view_information(self):
+        self.explain.setText("")
         self.imageview2.setVisible(True)
         self.l1.setVisible(True)
         self.l2.setVisible(True)
@@ -507,11 +531,12 @@ class WindowClass(QMainWindow, form_class) :
         self.l4.setVisible(True)
         self.l5.setVisible(True)
         self.l6.setVisible(True)
+        self.btn_main.setVisible(True)
         self.result_area.setVisible(True)
         self.result_area.setText(self.ocr_operated_text)
 
         #해당 이미지를 메인화면으로 변경
-        self.qPixmapVar.load(self.croped_img_path[0])
+        self.qPixmapVar.load(self.croped_img_path)
         self.qPixmapVar = self.qPixmapVar.scaledToWidth(230)
         self.imageview2.setPixmap(self.qPixmapVar)
 
@@ -528,9 +553,35 @@ class WindowClass(QMainWindow, form_class) :
         self.l2.setText("관할지 : "+self.car_information.pop())
         self.l1.setText("지역 : "+self.car_information.pop())
 
-        carDetection_video.flag=0
         
+        
+    def return_main(self):
+        self.imageview2.hide()
+        self.l1.hide()
+        self.l2.hide()
+        self.l3.hide()
+        self.l4.hide()
+        self.l5.hide()
+        self.l6.hide()
+        self.btn_main.hide()
+        self.result_area.hide()
+        self.result_area.setText("")
 
+        #메인 이미지 설정
+        self.imageview.setVisible(True)
+        self.qPixmapVar = QPixmap()
+        self.qPixmapVar.load("core_imgs\\carz.png")
+        self.qPixmapVar = self.qPixmapVar.scaledToWidth(600)
+        #메인 이미지 불러와서 적용
+        self.imageview.setPixmap(self.qPixmapVar)
+        
+        self.btn_ok.setVisible(True)
+        self.btn_upload.setVisible(True)
+        self.btn_video_capture.setVisible(True)
+        
+        self.btn_ok.setText("확인")
+        self.explain.setText("이미지 선택 방식을 결정해주세요.")
+        self.ch=0
 
 if __name__ == "__main__" :
     #QApplication : 프로그램을 실행시켜주는 클래스

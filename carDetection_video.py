@@ -1,9 +1,17 @@
 import cv2
 import numpy as np
 import time
+import os
 
 def live_capture():
     #기본 정보 읽어오기, 세팅
+
+    #분할이미지 저장경로 지정
+    save_path="d:\\carz_operated\\cuted_img"
+    #경로 없는 경우 생성
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+
     cnt = 0
     net = cv2.dnn.readNet("custom_final2.weights","custom.cfg")
     classes = []
