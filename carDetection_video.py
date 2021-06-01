@@ -52,7 +52,7 @@ def live_capture():
             #cv2.imshow("detect", frame)                     #화면에 영상 계속 표사
             if flag < 2 and len(boxes)>0:
                 for i in range(len(crop_img)):
-                    croped_img_path="d:\\cuted_img\\" + "dpl" + ".jpg"
+                    croped_img_path="d:\\carz_operated\\cuted_img\\" + "dpl" + ".jpg"
                     cv2.imwrite(croped_img_path, crop_img[i])#번호판 부분만 저장
                     time.sleep(3)
                     print(str(cnt)+"번째 3초뒤 저장")

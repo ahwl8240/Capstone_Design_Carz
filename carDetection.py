@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 def plate_detect(img_path):
     #기본 정보 읽어오기, 세팅
@@ -64,8 +65,14 @@ def plate_detect(img_path):
     #찾아낸 번호판들의 위치를 저장할 리스트
     img_list=[]
 
+    #분할이미지 저장경로 지정
+    save_path="d:\\carz_operated\\cuted_img"
+    #경로 없는 경우 생성
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+
     for i in range(cnt):
-            croped_img_path="d:\\cuted_img\\" + "detection_crop" + str(i) + ".jpg"
+            croped_img_path="d:\\carz_operated\\cuted_img\\" + "detection_crop" + str(i) + ".jpg"
             cv2.imwrite(croped_img_path,crop_img[i]) #번호판 부분만 result폴더에 원본사진_detuction+ 0,1,2...으로 저장
             img_list.append(croped_img_path)
     cv2.waitKey(0)

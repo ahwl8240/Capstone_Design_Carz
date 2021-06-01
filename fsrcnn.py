@@ -31,7 +31,7 @@ def sr_operate(img_path):
     result = sr.upsample(image)
 
     # Save the image
-    save_path="d:\sr_img"
+    save_path="d:\\carz_operated\\sr_img"
     if not os.path.exists(save_path):
         os.mkdir(save_path)
     cv2.imwrite(save_path+"\\upscaled.png", result)

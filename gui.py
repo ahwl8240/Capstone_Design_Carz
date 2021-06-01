@@ -12,6 +12,7 @@ import fsrcnn
 import carDetection
 import carDetection_video
 import Use_Classification
+import Recog_easyOCR
 
 import os
 import cv2
@@ -30,6 +31,18 @@ class WindowClass(QMainWindow, form_class) :
         
         super().__init__()
         self.setupUi(self)
+
+
+        #처리된 이미지들이 저장될 경로 생성
+        root_path="d:\\carz_operated"
+        #경로 없는 경우 생성
+        if not os.path.exists(root_path):
+            os.mkdir(root_path)
+        
+        #있는 경우 폴더 삭제 후 재생성(파일 꼬임 등을 방지하기 위해)
+        else:
+            shutil.rmtree(r"d:\\carz_operated")
+            os.mkdir(root_path)
         
         self.ch = 0
         self.fsrcnn_img=""
@@ -114,7 +127,7 @@ class WindowClass(QMainWindow, form_class) :
             self.imageview.setPixmap(self.qPixmapVar)
 
             #분할이미지 저장경로 지정
-            save_path="d:\\cuted_img"
+            save_path="d:\\carz_operated\\cuted_img"
 
             #경로 없는 경우 생성
             if not os.path.exists(save_path):
@@ -122,7 +135,7 @@ class WindowClass(QMainWindow, form_class) :
             
             #있는 경우 폴더 삭제 후 재생성(파일 꼬임 등을 방지하기 위해)
             else:
-                shutil.rmtree(r"d:\\cuted_img")
+                shutil.rmtree(r"d:\\carz_operated\\cuted_img")
                 os.mkdir(save_path)
 
             #20프레임 단위로 자름
@@ -261,8 +274,7 @@ class WindowClass(QMainWindow, form_class) :
         #sr이후 LPD까지 끝난 경우 OCR 처리
         elif self.ch==3:
             self.btn_ok.setText("용도분류")
-            print("OCR 들어갈 자리")
-            self.ocr_operated_text="998가4568"
+            self.ocr_operated_text=Recog_easyOCR.operate_OCR(self.croped_img_path[0])
             print(self.ocr_operated_text)
             self.ch=5
         elif self.ch==5:
@@ -275,7 +287,7 @@ class WindowClass(QMainWindow, form_class) :
     def img_list_select(self):
         self.btn_ok.setVisible(True)
         #잘린 이미지들을 불러옴
-        self.img_list = os.listdir("d:\cuted_img")
+        self.img_list = os.listdir("d:\\carz_operated\\cuted_img")
 
         #여기부터는 불필요한 작업일 수 있음
         self.FILE_LIST=[]
@@ -293,10 +305,10 @@ class WindowClass(QMainWindow, form_class) :
 
             #각각의 이미지 경로로부터 이미지 오브젝트 생성
             for png_file in png_list:
-                pixmap = QPixmap("d:\cuted_img"+'\\'+png_file)
+                pixmap = QPixmap("d:\\carz_operated\\cuted_img"+'\\'+png_file)
 
                 #해당 이미지 경로 저장
-                png_path = "d:\cuted_img"+'\\'+png_file
+                png_path = "d:\\carz_operated\\cuted_img"+'\\'+png_file
                 self.PNG_LIST.append(png_path)
         
         #해당 과정 중 불필요한 오브젝트들을 숨긴다
@@ -420,7 +432,7 @@ class WindowClass(QMainWindow, form_class) :
         count = 1
         success = True
         #분할이미지 저장경로 지정
-        save_path="d:\\cuted_img"
+        save_path="d:\\carz_operated\\cuted_img"
 
         #경로 없는 경우 생성
         if not os.path.exists(save_path):
@@ -428,7 +440,7 @@ class WindowClass(QMainWindow, form_class) :
             
         #있는 경우 폴더 삭제 후 재생성(파일 꼬임 등을 방지하기 위해)
         else:
-            shutil.rmtree(r"d:\\cuted_img")
+            shutil.rmtree(r"d:\\carz_operated\\cuted_img")
             os.mkdir(save_path)
 
         """
@@ -515,6 +527,8 @@ class WindowClass(QMainWindow, form_class) :
         self.l3.setText("차종 : "+self.car_information.pop())
         self.l2.setText("관할지 : "+self.car_information.pop())
         self.l1.setText("지역 : "+self.car_information.pop())
+
+        carDetection_video.flag=0
         
 
 
