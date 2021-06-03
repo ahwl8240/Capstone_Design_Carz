@@ -37,7 +37,7 @@ def live_capture():
                 scores = detection[5:]
                 class_id = np.argmax(scores)
                 confidence = scores[class_id]
-                if confidence > 0.75:
+                if confidence > 0.9:
                     center_x = int(detection[0]*width)  #찾은 객체의 가운데 x 좌표
                     center_y = int(detection[1]*height) #찾은 객체의 가운데 y 좌표
                     w = int(detection[2]*width)         #찾은 객체의 너비
@@ -49,26 +49,26 @@ def live_capture():
                     class_ids.append(class_id)
 
 
-
+    
             indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)    #노이즈 제거
-            crop_img=[]
+            #crop_img=[]
             for i in range(len(boxes)):
                 if i in indexes:
                     x,y,w,h = boxes[i]
-                    crop_img.append(frame[y+1:y+h, x+1:x+w])
+                    crop_img=frame[y+1:y+h, x+1:x+w]
                     cv2.rectangle(frame, (x,y), (x+w, y+h), (0,0,255),1)  #번호판에 사각형 표시
             #cv2.imshow("detect", frame)                     #화면에 영상 계속 표사
-            if flag < 2 and len(boxes)>0:
-                for i in range(len(crop_img)):
-                    croped_img_path="d:\\carz_operated\\cuted_img\\" + "dpl" + ".jpg"
-                    cv2.imwrite(croped_img_path, crop_img[i])#번호판 부분만 저장
-                    time.sleep(3)
-                    print(str(cnt)+"번째 3초뒤 저장")
-                    
+            if flag < 5 and len(boxes)>0:
+               
+                croped_img_path="d:\\carz_operated\\cuted_img\\" + str(flag) + ".jpg"
+                cv2.imwrite(croped_img_path, crop_img)#번호판 부분만 저장
+                if flag < 5:
+                    time.sleep(1)
+                    print(str(flag)+"번째 1초뒤 저장") 
                 flag += 1                                    #인식했다는 표시
-            if flag>=2:
+            if flag==5:
                 cv2.destroyAllWindows()
                 break
-        if flag>=2:
+        if flag==5:
             break
     return croped_img_path
