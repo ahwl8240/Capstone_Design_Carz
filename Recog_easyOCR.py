@@ -4,7 +4,8 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 import cv2
 import easyocr
-reader = easyocr.Reader(['ko'])
+#reader = easyocr.Reader(['ko'])
+reader = easyocr.Reader(['ko'], gpu=False)
 
 # 인식한 문자열 처리 함수
 def process(chars):

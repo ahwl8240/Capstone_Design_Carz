@@ -11,9 +11,9 @@ def plate_detect(img_path):
         os.mkdir(save_path)
         
     print(img_path)
-    net = cv2.dnn.readNet("yolo-obj_last.weights","yolo-obj.cfg")
+    net = cv2.dnn.readNet("custom_final2.weights","custom.cfg")
     classes = []
-    with open("obj.names", "r") as f:
+    with open("custom.names", "r") as f:
         classes = [line.strip() for line in f.readlines()]
 
     layer_names = net.getLayerNames()

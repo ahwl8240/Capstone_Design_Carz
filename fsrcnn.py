@@ -18,6 +18,7 @@ def sr_operate(img_path):
 
     # Read the desired model
     path = "FSRCNN_x4.pb"
+    path = os.path.abspath(path)
     sr.readModel(path)
 
     # Set CUDA backend and target to enable GPU inference
