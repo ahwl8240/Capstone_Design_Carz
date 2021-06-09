@@ -6,6 +6,8 @@ from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 
+import easyocr
+import inspect
 import shutil
 import winsound as sd
 import fsrcnn
@@ -19,7 +21,13 @@ import cv2
 #UI파일 연결
 #단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
 
-form_class = uic.loadUiType("test.ui")[0]
+def resource_path(relative_path): 
+    """ Get absolute path to resource, works for dev and for PyInstaller """ 
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))) 
+    return os.path.join(base_path, relative_path)
+
+form = resource_path("test.ui") 
+form_class = uic.loadUiType(form)[0]
 
 #화면을 띄우는데 사용되는 Class 선언
 class WindowClass(QMainWindow, form_class) :
@@ -32,7 +40,7 @@ class WindowClass(QMainWindow, form_class) :
         super().__init__()
         self.setupUi(self)
 
-
+        print(inspect.getfile(easyocr))
         #처리된 이미지들이 저장될 경로 생성
         root_path="d:\\carz_operated"
         #경로 없는 경우 생성
